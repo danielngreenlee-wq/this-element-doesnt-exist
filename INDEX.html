@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>This Element Does Not Exist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+–bg: #07080a;
+–surface: #0e1015;
+–surface2: #151820;
+–border: #1e2230;
+–text: #e8e6e1;
+–text-dim: #6b6f7b;
+–accent: #00ff88;
+–accent2: #00ccff;
+–accent3: #ff3366;
+}
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+.noise-overlay {
+position: fixed; inset: 0; z-index: 100; pointer-events: none; opacity: 0.03;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’/%3E%3C/svg%3E”);
+}
+
+.header {
+text-align: center;
+padding: 32px 20px 6px;
+}
+
+.header h1 {
+font-family: ‘Playfair Display’, serif;
+font-weight: 900;
+font-size: clamp(1.6rem, 4.5vw, 2.8rem);
+letter-spacing: -0.02em;
+background: linear-gradient(135deg, var(–accent), var(–accent2));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+margin-bottom: 6px;
+}
+
+.header .subtitle {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.7rem;
+color: var(–text-dim);
+letter-spacing: 0.15em;
+text-transform: uppercase;
+}
+
+.main-container {
+max-width: 1300px;
+margin: 0 auto;
+padding: 24px 20px;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 24px;
+align-items: start;
+opacity: 0;
+animation: fadeIn 0.8s ease forwards 0.2s;
+}
+
+@media (max-width: 860px) {
+.main-container { grid-template-columns: 1fr; }
+}
+
+@keyframes fadeIn { to { opacity: 1; } }
+
+.left-col, .right-col {
+display: flex;
+flex-direction: column;
+gap: 18px;
+}
+
+.models-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 14px;
+}
+
+@media (max-width: 600px) {
+.models-row { grid-template-columns: 1fr; }
+}
+
+.viewport-wrap {
+background: #000;
+border: 1px solid var(–border);
+border-radius: 14px;
+aspect-ratio: 1;
+position: relative;
+overflow: hidden;
+}
+
+.viewport-wrap canvas {
+width: 100% !important;
+height: 100% !important;
+display: block;
+cursor: grab;
+}
+.viewport-wrap canvas:active { cursor: grabbing; }
+
+.viewport-label {
+position: absolute;
+bottom: 10px;
+left: 50%;
+transform: translateX(-50%);
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.55rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–text-dim);
+background: rgba(0,0,0,0.7);
+padding: 3px 10px;
+border-radius: 4px;
+pointer-events: none;
+z-index: 2;
+white-space: nowrap;
+}
+
+.element-badge {
+position: absolute;
+top: 12px; left: 12px;
+background: rgba(0,0,0,0.65);
+backdrop-filter: blur(12px);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 10px 14px;
+z-index: 2;
+}
+
+.element-badge .atomic-num {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.6rem;
+color: var(–accent);
+letter-spacing: 0.1em;
+}
+
+.element-badge .symbol {
+font-family: ‘Playfair Display’, serif;
+font-size: 2.4rem;
+font-weight: 900;
+line-height: 1;
+background: linear-gradient(135deg, #fff, var(–accent));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.element-badge .name {
+font-size: 0.7rem;
+color: var(–text-dim);
+margin-top: 1px;
+}
+
+.fake-tag {
+position: absolute;
+top: 12px; right: 12px;
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.55rem;
+color: var(–accent3);
+letter-spacing: 0.18em;
+text-transform: uppercase;
+background: rgba(255, 51, 102, 0.1);
+border: 1px solid rgba(255, 51, 102, 0.3);
+padding: 3px 8px;
+border-radius: 4px;
+z-index: 2;
+}
+
+.element-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 14px;
+padding: 20px;
+}
+
+.element-card h2 {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.4rem;
+font-weight: 700;
+margin-bottom: 3px;
+}
+
+.element-card .category {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.65rem;
+color: var(–accent2);
+letter-spacing: 0.1em;
+text-transform: uppercase;
+margin-bottom: 12px;
+display: inline-block;
+background: rgba(0, 204, 255, 0.08);
+padding: 2px 7px;
+border-radius: 4px;
+}
+
+.element-card .description {
+font-size: 0.84rem;
+color: var(–text-dim);
+line-height: 1.65;
+margin-bottom: 12px;
+}
+
+.element-card .discovery {
+font-size: 0.74rem;
+color: var(–text-dim);
+font-style: italic;
+border-top: 1px solid var(–border);
+padding-top: 10px;
+}
+.discovery span { color: var(–accent); }
+
+.prop-section {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 11px;
+padding: 16px;
+}
+
+.prop-section h3 {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.6rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(–text-dim);
+margin-bottom: 12px;
+padding-bottom: 6px;
+border-bottom: 1px solid var(–border);
+}
+
+.prop-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+.prop-item {
+display: flex;
+flex-direction: column;
+gap: 1px;
+}
+
+.prop-item .label { font-size: 0.64rem; color: var(–text-dim); }
+.prop-item .value { font-family: ‘IBM Plex Mono’, monospace; font-size: 0.88rem; font-weight: 500; color: var(–text); }
+.prop-item .value.highlight { color: var(–accent); }
+
+.electron-config {
+font-family: ‘IBM Plex Mono’, monospace;
+font-size: 0.78rem;
+color: var(–accent2);
+word-break: break-all;
+line-height: 1.55;
+}
+.electron-config sup { font-size: 0.55em; color: var(–accent); }
+
+.shells-vis {
+display: flex; gap: 5px; align-items: flex-end;
+margin-top: 8px; height: 50px; margin-bottom: 20px;
+}
+
+.shell-bar {
+flex: 1;
+background: linear-gradient(to top, var(–accent), var(–accent2));
+border-radius: 3px 3px 0 0;
+position: relative; min-width: 16px; opacity: 0.7;
+transition: opacity 0.2s;
+}
+.shell-bar:hover { opacity: 1; }
+.shell-bar .shell-label { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-family: ‘IBM Plex Mono’, monospace; font-size: 0.5rem; color: var(–text-dim); }
+.shell-bar .shell-count { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-family: ‘IBM Plex Mono’, monospace; font-size: 0.55rem; color: var(–accent); }
+
+.danger-bar { height: 5px; border-radius: 3px; background: var(–surface2); overflow: hidden; margin-top: 5px; }
+.danger-fill { height: 100%; border-radius: 3px; }
+
+.isotopes-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.isotope-chip {
+font-family: ‘IBM Plex Mono’, monospace; font-size: 0.64rem;
+padding: 2px 7px; border-radius: 4px;
+background: var(–surface2); border: 1px solid var(–border); color: var(–text-dim);
+}
+.isotope-chip.stable { border-color: rgba(0, 255, 136, 0.3); color: var(–accent); }
+
+.reload-btn {
+position: fixed; bottom: 24px; right: 24px; z-index: 50;
+background: linear-gradient(135deg, var(–accent), var(–accent2));
+border: none; color: #000;
+font-family: ‘IBM Plex Mono’, monospace; font-size: 0.7rem; font-weight: 700;
+letter-spacing: 0.1em; text-transform: uppercase;
+padding: 12px 24px; border-radius: 50px; cursor: pointer;
+transition: transform 0.2s, box-shadow 0.2s;
+box-shadow: 0 4px 30px rgba(0, 255, 136, 0.3);
+}
+.reload-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 40px rgba(0, 255, 136, 0.4); }
+.reload-btn:active { transform: scale(0.97); }
+</style>
+
+</head>
+<body>
+<div class="noise-overlay"></div>
+<div class="header">
+  <h1>This Element Does Not Exist</h1>
+  <div class="subtitle">Procedurally generated fictional elements — hit reload for a new one</div>
+</div>
+<div class="main-container" id="app"></div>
+<button class="reload-btn" onclick="generate()">&#x27F3; New Element</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+const rand=(a,b)=>Math.random()*(b-a)+a;
+const randInt=(a,b)=>Math.floor(rand(a,b+1));
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+
+const PREFIXES=["Aeth","Zon","Qua","Vy","Xen","Pyr","Cry","Nov","Lum","Fer","Bol","Thal","Zer","Nyx","Ori","Dra","Vel","Mor","Syn","Kas","Pho","Aur","Sel","Ith","Gly","Rho","Tyr","Elu","Mag","Cal","Vor","Neb","Ris","Dex","Hal","Zir","Cor","Fyn","Wyx","Kel","Bri","Tes","Dul","Nar","Gor"];
+const MIDS=["an","or","un","il","en","os","ar","ix","um","al","on","yr","is","ol","in","er","us","el","as","ez","em","io"];
+const SUFFIXES=["ium","ine","on","ite","ene","ase","ide","yne","ore","ane","ose"];
+const CATEGORIES=["Reactive Nonmetal","Alkali Metalloid","Transition Phantom","Noble Synthetic","Post-Transition Composite","Hyper-Lanthanide","Quantum Halogen","Dark Actinide","Exotic Metalloid","Synthetic Superfluid","Crystalline Gas","Plasma-State Solid","Fermion Metal","Strange Conductor","Boson Lattice Metal"];
+const STATES=["Solid","Liquid","Gas","Plasma","Superfluid","Crystalline Gas","Bose-Einstein Condensate"];
+const CRYSTAL=["Cubic","Hexagonal","Tetragonal","Orthorhombic","Monoclinic","Triclinic","Rhombohedral","Quasicrystalline","Amorphous Lattice","Fractal Cubic"];
+const COLORS_LIST=["Iridescent Silver","Deep Violet","Pale Crimson","Electric Teal","Obsidian Black","Luminous Amber","Ghost White","Molten Gold","Neon Chartreuse","Dark Emerald","Frost Blue","Blood Orange","Phantom Grey","Coral Pink","Void Purple"];
+const DISCOVERERS=["Dr. Helena Voss","Prof. Idris Nakamura","Dr. Sable Okonkwo","Prof. Leif Johansson","Dr. Mei-Ling Zhao","Prof. Alistair Finch","Dr. Anya Petrov","Prof. Kofi Mensah","Dr. Lena Eriksdottir","Prof. Raj Subramaniam"];
+const LABS=["CERN Hypercollider","Kyoto Quantum Lab","Svalbard Deep Ice Facility","Lagos Advanced Materials Institute","Geneva Antimatter Annex","Atacama Subatomic Observatory","Reykjavik Plasma Chamber","Mumbai Particle Accelerator","Z\u00FCrich Dark Matter Lab"];
+
+// ============ PROCEDURAL DESCRIPTION GENERATOR ============
+function generateDescription(name, category, state, color, year, discoverer, lab, halfLife) {
+  var cat = category.toLowerCase();
+
+  var openers = [
+    name + ' is a ' + pick(['highly unstable','remarkably volatile','paradoxically stable','deceptively inert','profoundly reactive','vanishingly rare','bewilderingly complex','hauntingly ephemeral','stubbornly persistent','strangely self-organizing','thermodynamically impossible','gravitationally anomalous','optically paradoxical']) + ' ' + cat + ' that exists for only fractions of a second under laboratory conditions',
+    'First predicted in ' + randInt(1940,2010) + ' by ' + pick(['a rogue graduate student','an anonymous researcher','a classified military project','a team of computational chemists','a retired physicist','an AI-assisted simulation','a lone experimentalist working in isolation']) + ', ' + name + ' was only recently confirmed to exist',
+    name + ', classified as a ' + cat + ', was ' + pick(['accidentally synthesized','unexpectedly isolated','serendipitously discovered','painstakingly extracted','computationally predicted then verified','detected in trace amounts']) + ' at ' + lab + ' in ' + year,
+    'The ' + pick(['elusive','enigmatic','controversial','legendary','infamous']) + ' element ' + name + ' has ' + pick(['puzzled','fascinated','terrified','divided','captivated','obsessed']) + ' researchers since its ' + pick(['discovery','synthesis','detection','isolation','theoretical prediction']),
+    'Among the ' + pick(['strangest','rarest','most dangerous','most sought-after','most debated','least understood']) + ' elements ever ' + pick(['catalogued','documented','synthesized','observed','recorded']) + ', ' + name + ' stands ' + pick(['alone','apart','in a class of its own','as a true anomaly','without parallel']),
+    discoverer + ' ' + pick(['stumbled upon','first isolated','successfully created','accidentally produced','painstakingly synthesized']) + ' ' + name + ' while ' + pick(['running unrelated fusion experiments','calibrating a particle beam','analyzing cosmic ray residue','investigating neutron star material','debugging a quantum simulation','studying meteorite fragments','conducting routine mass spectrometry']),
+    'No element has ' + pick(['challenged','defied','rewritten','upended','complicated','subverted']) + ' the periodic table quite like ' + name,
+    name + ' exists at the ' + pick(['razor edge','bleeding edge','theoretical limit','absolute boundary','outermost frontier']) + ' of ' + pick(['nuclear stability','atomic physics','synthetic chemistry','quantum mechanics','materials science']),
+    'What makes ' + name + ' ' + pick(['remarkable','extraordinary','unsettling','fascinating','alarming','unprecedented']) + ' is not just its classification as a ' + cat + ', but its ' + pick(['complete defiance of','bizarre relationship with','paradoxical adherence to','selective violation of']) + ' established physical laws',
+  ];
+
+  var middles = [
+    'Its ' + pick(['unusual','anomalous','unprecedented','bizarre','extraordinary','unique','inexplicable','baffling']) + ' ' + pick(['electron configuration','nuclear geometry','orbital structure','quantum state','spin alignment','magnetic moment','decay signature','binding energy','charge distribution']) + ' gives it properties ' + pick(['never before observed','thought to be impossible','that defy conventional models','predicted only in theory','that challenge current understanding','no simulation could have predicted','that contradict the Standard Model']),
+    'It exhibits ' + pick(['paradoxical','counterintuitive','contradictory','dual','shifting','oscillating']) + ' behavior, ' + pick(['simultaneously conducting and insulating','showing metallic luster but gaseous density','absorbing all light yet appearing luminous','existing in two quantum states at once','bonding with noble gases under standard conditions','repelling its own atoms at certain temperatures','vibrating at frequencies that cancel nearby sound','phasing between solid and plasma states']),
+    'Under ' + pick(['extreme cold','intense pressure','strong magnetic fields','UV irradiation','acoustic stimulation','vacuum conditions','zero-gravity','bombardment by neutrinos','proximity to dark matter','tidal gravitational stress']) + ', it ' + pick(['transforms into a superfluid','becomes a room-temperature superconductor','spontaneously emits photons','reverses its magnetic polarity','doubles in density','loses all measurable mass','begins resonating at audible frequencies','crystallizes into fractal patterns','emits Cherenkov radiation in open air']),
+    'Trace amounts of ' + name + ' have been ' + pick(['detected in','recovered from','theorized to exist in','linked to anomalies in']) + ' ' + pick(['deep ocean thermal vents','lunar regolith samples','supernova remnants','interstellar dust clouds','ancient meteorite cores','the atmospheres of gas giants','lightning strike residue','volcanic xenolith fragments','Martian soil analysis','neutron star collision debris','cometary ice samples']),
+    'When ' + pick(['combined with liquid nitrogen','exposed to concentrated acid','dissolved in ionized plasma','bombarded by gamma radiation','suspended near antimatter traces','submerged in heavy water','heated beyond 5000 Kelvin','compressed to 10 million atmospheres']) + ', ' + name + ' ' + pick(['undergoes catastrophic fission','emits a distinctive hum','turns completely transparent','generates an electromagnetic pulse','self-assembles into nanostructures','produces an unknown form of radiation','creates microscopic singularities that instantly evaporate','vibrates at frequencies that shatter nearby glass']),
+    'Its discoverer, ' + discoverer + ', ' + pick(['famously remarked','reportedly said','noted in their journal','confided to colleagues']) + ' that ' + name + ' ' + pick(['behaves as if it has a mind of its own','should not exist according to everything we know','made them question whether current models mean anything','is either the greatest discovery or the greatest mistake of their career','seems to exist in spite of physics','rewrites the rules every time they think they understand it']),
+    name + ' has a ' + pick(['strikingly','disturbingly','beautifully','eerily','deceptively']) + ' ' + color.toLowerCase() + ' ' + pick(['appearance','hue','luminescence','glow','sheen','tint']) + ' that ' + pick(['shifts under different lighting','pulses faintly in the dark','has no known explanation','is caused by forbidden electron transitions','changes based on the viewing angle','fades irreversibly after exposure to air']),
+    'With a half-life of ' + halfLife + ', it is ' + pick(['nearly impossible to study','a logistical nightmare to transport','extraordinarily difficult to contain','one of the most fleeting substances known','theoretically useful for quantum computing','a ticking clock for any research team working with it']),
+    'In its ' + state.toLowerCase() + ' state, ' + name + ' displays ' + pick(['quasi-crystalline','fractal','self-similar','non-Euclidean','holographic','tessellating']) + ' ' + pick(['patterns','symmetries','growth structures','lattice formations','wave functions','interference patterns']) + ' that ' + pick(['have never been replicated','violate known crystallography','suggest higher-dimensional origins','appear to encode information','resemble organic neural networks','defy computational modeling']),
+    'Its ' + pick(['molecular bonds','atomic lattice','crystal structure','nuclear configuration','electron cloud']) + ' ' + pick(['rearranges','shifts','oscillates','mutates','reconfigures','collapses and reforms']) + ' ' + pick(['every few milliseconds','in response to observation','when exposed to ambient sound','under the slightest thermal fluctuation','seemingly at random','in perfect mathematical sequences']),
+    'Spectral analysis reveals ' + pick(['emission lines','absorption bands','fluorescence peaks','resonance frequencies']) + ' that do not match ' + pick(['any known element','current atomic theory predictions','the expected quantum mechanical model','anything in existing spectral databases','patterns seen in any other substance']),
+    'Samples of ' + name + ' appear to ' + pick(['slowly evaporate even in sealed containers','generate trace amounts of heat indefinitely','attract nearby metallic objects','interfere with electronic equipment','cause localized gravitational anomalies','produce faint audio-frequency vibrations']),
+  ];
+
+  var endings = [
+    'Potential applications include ' + pick(['quantum computing','deep-space propulsion','zero-point energy extraction','neural interface substrates','gravitational lensing','molecular-scale computing','fusion reactor containment','dark energy harvesting','next-generation stealth materials','medical nanobots','room-temperature superconducting cables','interstellar communication arrays']) + ', though ' + pick(['none have been realized','all remain theoretical','ethical concerns persist','containment remains unsolved','funding has been cut repeatedly','military classification limits research','no lab can produce enough to test','safety protocols do not yet exist']),
+    'It remains one of the most ' + pick(['controversial','enigmatic','dangerous','coveted','misunderstood','classified','debated','feared','celebrated']) + ' entries in the ' + pick(['extended periodic table','post-oganesson catalogue','synthetic element registry','experimental element database']),
+    'To this day, only ' + pick(['a few','fewer than a dozen','approximately ' + randInt(3,30),'an estimated ' + randInt(50,500)]) + ' ' + pick(['atoms','molecules','micrograms','nanograms','samples']) + ' of ' + name + ' have ever been ' + pick(['produced','confirmed','isolated','observed','synthesized','documented']),
+    pick(['Ongoing','Current','Recent','Classified','International','Controversial']) + ' research at ' + lab + ' ' + pick(['aims to','hopes to','is attempting to','may soon']) + ' ' + pick(['stabilize its decay chain','produce macroscopic samples','harness its unique radiation','unlock its superconducting potential','decode its quantum behavior','determine if it occurs naturally anywhere in the universe']),
+    'Its discovery ' + pick(['earned','nearly earned','was controversially denied','led to a contested nomination for','resulted in a shared']) + ' ' + pick(['the Nobel Prize in Chemistry','international acclaim','a classified government contract','a bitter academic feud','calls for a new branch of physics','the creation of an entirely new research field']),
+    'Whether ' + name + ' represents a ' + pick(['breakthrough','dead end','warning','glimpse of the future','paradigm shift']) + ' in ' + pick(['chemistry','physics','materials science','energy research','our understanding of matter']) + ' remains ' + pick(['hotly debated','an open question','unclear','a matter of fierce disagreement','to be seen','the defining question of 21st-century science']),
+    pick(['Alarmingly','Curiously','Notably','Disturbingly','Fascinatingly']) + ', ' + pick(['several','multiple','at least two','three known','a handful of']) + ' ' + pick(['laboratory accidents','containment failures','unexplained incidents','researcher hospitalizations','facility evacuations','equipment meltdowns']) + ' have been ' + pick(['linked to','attributed to','blamed on','caused by','associated with']) + ' ' + name + ' since its synthesis',
+    'Some theorists ' + pick(['believe','speculate','argue','have controversially proposed','maintain']) + ' that ' + name + ' may ' + pick(['not be an element at all','exist in parallel dimensions','be a fragment of exotic matter','predate the Big Bang','hold the key to unified field theory','be the missing link between matter and dark matter','explain certain astronomical anomalies']),
+    'The scientific community remains ' + pick(['deeply divided','cautiously optimistic','openly skeptical','reluctantly fascinated','profoundly unsettled']) + ' about the implications of ' + name + ' for ' + pick(['the future of energy','our understanding of matter','the limits of the periodic table','quantum field theory','the search for extraterrestrial chemistry']),
+  ];
+
+  var bonusFacts = [
+    'It is ' + pick(['banned','restricted','classified','heavily regulated','under moratorium']) + ' in ' + pick(['over ' + randInt(12,40) + ' countries','most NATO nations','all EU member states','several undisclosed nations','every major research institution']),
+    pick(['Unconfirmed reports','Leaked documents','Declassified files','Anonymous sources','Whistleblower testimony']) + ' suggest ' + pick(['military','defense','intelligence','covert']) + ' interest in ' + name + ' for ' + pick(['weapons development','stealth technology','surveillance applications','propulsion systems','information warfare','directed energy research']),
+    'A single gram of ' + name + ' would cost an estimated $' + pick([randInt(1,999) + ' billion',randInt(1,99) + ' trillion',randInt(1,50) + ' quadrillion','more than the global GDP']),
+    'Its atomic symbol was at the center of a ' + pick(['heated','prolonged','surprisingly bitter','international','public']) + ' ' + pick(['naming dispute','academic controversy','jurisdictional argument','priority debate']) + ' between ' + pick(['competing research teams','rival nations','academic institutions','government agencies']),
+    pick(['Popular science','Fringe science','Conspiracy theory','Science fiction','Social media']) + ' communities have ' + pick(['latched onto','become obsessed with','wildly speculated about','mythologized','spread misinformation about']) + ' ' + name + ' since news of its synthesis leaked',
+    'At least ' + randInt(2,7) + ' ' + pick(['doctoral theses','research papers','classified reports','investigative articles']) + ' have been ' + pick(['retracted','suppressed','disputed','mysteriously pulled']) + ' in connection with ' + name,
+  ];
+
+  var usedMid = {};
+  function pickUniqueMid() {
+    var idx, attempts = 0;
+    do { idx = randInt(0, middles.length - 1); attempts++; } while (usedMid[idx] && attempts < 20);
+    usedMid[idx] = true;
+    return middles[idx];
+  }
+
+  var parts = [];
+  parts.push(pick(openers));
+  parts.push(pickUniqueMid());
+  if (Math.random() < 0.65) parts.push(pickUniqueMid());
+  parts.push(pick(endings));
+  if (Math.random() < 0.4) parts.push(pick(bonusFacts));
+
+  return parts.join('. ') + '.';
+}
+
+function generateElement(){
+  const name=pick(PREFIXES)+pick(MIDS)+pick(SUFFIXES);
+  let sym;
+  if(Math.random()<0.3)sym=name[0]+name[Math.floor(name.length/2)];
+  else if(Math.random()<0.5)sym=name.slice(0,2);
+  else sym=name[0]+name.slice(-2,-1);
+  sym=sym[0].toUpperCase()+sym.slice(1).toLowerCase();
+  const atomicNum=randInt(119,218);
+  const category=pick(CATEGORIES);
+  const atomicMass=(atomicNum*rand(2.1,2.9)).toFixed(3);
+  const shellNames=["K","L","M","N","O","P","Q","R"];
+  const maxEl=[2,8,18,32,32,18,8,2];
+  let rem=atomicNum;const shells=[];
+  for(let i=0;i<shellNames.length&&rem>0;i++){const f=Math.min(rem,maxEl[i]);shells.push({name:shellNames[i],electrons:f});rem-=f;}
+  const subshells=["1s","2s","2p","3s","3p","4s","3d","4p","5s","4d","5p","6s","4f","5d","6p","7s","5f","6d","7p","8s"];
+  const subMax=[2,2,6,2,6,2,10,6,2,10,6,2,14,10,6,2,14,10,6,2];
+  let rem2=atomicNum;let configStr="";
+  for(let i=0;i<subshells.length&&rem2>0;i++){const f=Math.min(rem2,subMax[i]);configStr+=`${subshells[i]}^${f} `;rem2-=f;}
+  const meltingPoint=rand(-270,4000).toFixed(1);
+  const boilingPoint=(parseFloat(meltingPoint)+rand(50,2000)).toFixed(1);
+  const density=rand(0.1,28).toFixed(3);
+  const electronegativity=rand(0.5,4.2).toFixed(2);
+  const ionizationEnergy=rand(300,2500).toFixed(1);
+  const atomicRadius=randInt(40,320);
+  const state=pick(STATES);const crystal=pick(CRYSTAL);const color=pick(COLORS_LIST);
+  const halfLife=Math.random()<0.3?`${rand(0.001,0.9).toFixed(3)} ms`:Math.random()<0.5?`${rand(1,500).toFixed(1)} s`:`${rand(1,50000).toFixed(0)} years`;
+  const radioactivity=rand(0,100),toxicity=rand(0,100),reactivity=rand(0,100);
+  const year=randInt(2019,2037);const discoverer=pick(DISCOVERERS);const lab=pick(LABS);
+  const description=generateDescription(name,category,state,color,year,discoverer,lab,halfLife);
+  const numIsotopes=randInt(2,7);const isotopes=[];
+  for(let i=0;i<numIsotopes;i++)isotopes.push({notation:`${sym}-${atomicNum+randInt(-3,numIsotopes+5)}`,stable:Math.random()<0.2});
+  const oxidationStates=[];for(let i=0;i<randInt(1,4);i++)oxidationStates.push(randInt(-4,8));
+  return{name,sym,atomicNum,category,atomicMass,shells,configStr:configStr.trim(),meltingPoint,boilingPoint,density,electronegativity,ionizationEnergy,atomicRadius,state,crystal,color,halfLife,radioactivity,toxicity,reactivity,year,discoverer,lab,description,isotopes,oxidationStates};
+}
+
+// ========== SIMPLE ORBIT CONTROLS ==========
+class SimpleOrbitControls{
+  constructor(cam,el){
+    this.cam=cam;this.el=el;this.target=new THREE.Vector3();
+    this.isDragging=false;this.prev={x:0,y:0};
+    this.sph={theta:0,phi:Math.PI/2.5,r:cam.position.length()};
+    el.addEventListener('mousedown',e=>{this.isDragging=true;this.prev={x:e.clientX,y:e.clientY};});
+    el.addEventListener('touchstart',e=>{this.isDragging=true;const t=e.touches[0];this.prev={x:t.clientX,y:t.clientY};},{passive:true});
+    window.addEventListener('mouseup',()=>this.isDragging=false);
+    window.addEventListener('touchend',()=>this.isDragging=false);
+    el.addEventListener('mousemove',e=>this._m(e.clientX,e.clientY));
+    el.addEventListener('touchmove',e=>{const t=e.touches[0];this._m(t.clientX,t.clientY);},{passive:true});
+    el.addEventListener('wheel',e=>{e.preventDefault();this.sph.r=Math.max(3,Math.min(18,this.sph.r+e.deltaY*0.008));this._u();},{passive:false});
+    this._u();
+  }
+  _m(cx,cy){if(!this.isDragging)return;const dx=cx-this.prev.x,dy=cy-this.prev.y;this.sph.theta-=dx*0.005;this.sph.phi=Math.max(0.1,Math.min(Math.PI-0.1,this.sph.phi-dy*0.005));this.prev={x:cx,y:cy};this._u();}
+  _u(){const s=this.sph;this.cam.position.set(s.r*Math.sin(s.phi)*Math.sin(s.theta)+this.target.x,s.r*Math.cos(s.phi)+this.target.y,s.r*Math.sin(s.phi)*Math.cos(s.theta)+this.target.z);this.cam.lookAt(this.target);}
+}
+
+// ========== 3D ATOM (ORBITAL) ==========
+let atomAnimId;
+function initAtomModel(container,element){
+  if(atomAnimId)cancelAnimationFrame(atomAnimId);
+  container.querySelectorAll('canvas').forEach(c=>c.remove());
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(50,1,0.1,1000);camera.position.z=6;
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setClearColor(0x000000,1);
+  container.appendChild(renderer.domElement);
+  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};
+  resize();window.addEventListener('resize',resize);
+  const group=new THREE.Group();scene.add(group);
+  const nucGeo=new THREE.SphereGeometry(0.4,32,32);
+  const nucMat=new THREE.MeshStandardMaterial({color:0x00ff88,emissive:0x00ff88,emissiveIntensity:0.5,metalness:0.7,roughness:0.2});
+  const nucleus=new THREE.Mesh(nucGeo,nucMat);group.add(nucleus);
+  const bc=Math.min(element.atomicNum,14);
+  for(let i=0;i<bc;i++){
+    const phi=Math.acos(2*Math.random()-1),theta=Math.random()*Math.PI*2;
+    const bGeo=new THREE.SphereGeometry(0.11,10,10);const isP=Math.random()<0.5;
+    const bMat=new THREE.MeshStandardMaterial({color:isP?0x00ccff:0xff3366,emissive:isP?0x00ccff:0xff3366,emissiveIntensity:0.3});
+    const bump=new THREE.Mesh(bGeo,bMat);
+    bump.position.set(0.32*Math.sin(phi)*Math.cos(theta),0.32*Math.sin(phi)*Math.sin(theta),0.32*Math.cos(phi));
+    group.add(bump);
+  }
+  const sColors=[0x00ff88,0x00ccff,0xff3366,0xffaa00,0xaa55ff,0xff66aa,0x66ffcc,0xffff00];
+  element.shells.forEach((shell,idx)=>{
+    const r=1.1+idx*0.55;
+    const ringGeo=new THREE.RingGeometry(r-0.008,r+0.008,128);
+    const ringMat=new THREE.MeshBasicMaterial({color:sColors[idx%sColors.length],side:THREE.DoubleSide,transparent:true,opacity:0.12});
+    const ring=new THREE.Mesh(ringGeo,ringMat);ring.rotation.x=rand(-0.6,0.6);ring.rotation.y=rand(-0.6,0.6);group.add(ring);
+    const eC=Math.min(shell.electrons,8);
+    for(let e=0;e<eC;e++){
+      const eGeo=new THREE.SphereGeometry(0.055,8,8);
+      const eMat=new THREE.MeshStandardMaterial({color:sColors[idx%sColors.length],emissive:sColors[idx%sColors.length],emissiveIntensity:0.8});
+      const el=new THREE.Mesh(eGeo,eMat);
+      el.userData={sI:idx,a:(e/eC)*Math.PI*2,r,sp:0.5+idx*0.15,rx:ring.rotation.x,ry:ring.rotation.y};
+      group.add(el);
+    }
+  });
+  scene.add(new THREE.AmbientLight(0xffffff,0.3));
+  const pl=new THREE.PointLight(0x00ff88,1.5,20);pl.position.set(3,3,5);scene.add(pl);
+  const pl2=new THREE.PointLight(0x00ccff,0.8,20);pl2.position.set(-3,-2,3);scene.add(pl2);
+  let mx=0,my=0;
+  container.addEventListener('mousemove',e=>{const r=container.getBoundingClientRect();mx=((e.clientX-r.left)/r.width-0.5)*2;my=((e.clientY-r.top)/r.height-0.5)*2;});
+  const clock=new THREE.Clock();
+  function animate(){
+    atomAnimId=requestAnimationFrame(animate);const t=clock.getElapsedTime();
+    nucleus.rotation.y=t*0.3;nucleus.rotation.x=t*0.2;
+    group.children.forEach(ch=>{
+      if(ch.userData&&ch.userData.sI!==undefined){
+        const d=ch.userData;const a=d.a+t*d.sp;
+        const x=d.r*Math.cos(a),y=d.r*Math.sin(a);
+        const y1=y*Math.cos(d.rx),z1=y*Math.sin(d.rx);
+        const x2=x*Math.cos(d.ry)+z1*Math.sin(d.ry),z2=-x*Math.sin(d.ry)+z1*Math.cos(d.ry);
+        ch.position.set(x2,y1,z2);
+      }
+    });
+    group.rotation.y+=(mx*0.5-group.rotation.y)*0.03;
+    group.rotation.x+=(-my*0.3-group.rotation.x)*0.03;
+    renderer.render(scene,camera);
+  }
+  animate();
+}
+
+// ========== 3D BALL-AND-STICK MOLECULAR MODEL ==========
+let molAnimId;
+function initMolecularModel(container,element){
+  if(molAnimId)cancelAnimationFrame(molAnimId);
+  container.querySelectorAll('canvas').forEach(c=>c.remove());
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,1,0.1,1000);camera.position.set(0,3,8);
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setClearColor(0x000000,1);
+  renderer.shadowMap.enabled=true;
+  container.appendChild(renderer.domElement);
+  const resize=()=>{const w=container.clientWidth,h=container.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};
+  resize();window.addEventListener('resize',resize);
+
+  const controls=new SimpleOrbitControls(camera,renderer.domElement);
+  controls.sph.r=8;controls._u();
+
+  const group=new THREE.Group();scene.add(group);
+
+  const atomTypes=[
+    {color:0x333333,emissive:0x111111,r:0.38},
+    {color:0xcc2222,emissive:0x550000,r:0.34},
+    {color:0xeeeeee,emissive:0x444444,r:0.22},
+    {color:0x2255cc,emissive:0x112255,r:0.32},
+    {color:0xeecc00,emissive:0x554400,r:0.30},
+    {color:0x00cc66,emissive:0x005522,r:0.30},
+    {color:0xcc55ff,emissive:0x442266,r:0.28},
+  ];
+
+  const numAtoms=randInt(10,22);
+  const atoms=[];const bonds=[];
+
+  function placeAtom(pos,pIdx){
+    let tIdx;
+    if(pIdx===-1) tIdx=0;
+    else {
+      const r=Math.random();
+      if(r<0.3) tIdx=0;
+      else if(r<0.55) tIdx=1;
+      else if(r<0.75) tIdx=2;
+      else tIdx=randInt(0,atomTypes.length-1);
+    }
+    const idx=atoms.length;
+    atoms.push({pos:pos.clone(),type:atomTypes[tIdx],tIdx});
+    if(pIdx>=0) bonds.push({a:pIdx,b:idx,dbl:Math.random()<0.18});
+    return idx;
+  }
+
+  const startIdx=placeAtom(new THREE.Vector3(0,0,0),-1);
+  const frontier=[startIdx];let att=0;
+  while(atoms.length<numAtoms&&frontier.length>0&&att<300){
+    att++;
+    const pIdx=frontier[Math.floor(Math.random()*frontier.length)];
+    const pPos=atoms[pIdx].pos;
+    const dir=new THREE.Vector3(rand(-1,1),rand(-1,1),rand(-1,1)).normalize();
+    const newPos=pPos.clone().add(dir.multiplyScalar(rand(1.2,1.8)));
+    let ok=true;
+    for(const a of atoms)if(a.pos.distanceTo(newPos)<0.85){ok=false;break;}
+    if(!ok)continue;
+    const nIdx=placeAtom(newPos,pIdx);
+    if(Math.random()<0.12&&atoms.length>3){
+      const other=randInt(0,atoms.length-2);
+      if(other!==nIdx&&other!==pIdx&&atoms[other].pos.distanceTo(newPos)<2.5)
+        bonds.push({a:other,b:nIdx,dbl:Math.random()<0.1});
+    }
+    frontier.push(nIdx);
+    if(frontier.length>5)frontier.splice(Math.floor(Math.random()*frontier.length),1);
+  }
+
+  const center=new THREE.Vector3();atoms.forEach(a=>center.add(a.pos));center.divideScalar(atoms.length);
+  atoms.forEach(a=>a.pos.sub(center));
+
+  atoms.forEach(a=>{
+    const geo=new THREE.SphereGeometry(a.type.r,24,24);
+    const mat=new THREE.MeshStandardMaterial({color:a.type.color,emissive:a.type.emissive,emissiveIntensity:0.1,metalness:0.2,roughness:0.45});
+    const mesh=new THREE.Mesh(geo,mat);mesh.position.copy(a.pos);mesh.castShadow=true;
+    group.add(mesh);
+  });
+
+  bonds.forEach(b=>{
+    const pA=atoms[b.a].pos,pB=atoms[b.b].pos;
+    const mid=pA.clone().add(pB).multiplyScalar(0.5);
+    const dir=pB.clone().sub(pA);const len=dir.length();
+    function makeBond(off){
+      const geo=new THREE.CylinderGeometry(0.065,0.065,len,8);
+      const mat=new THREE.MeshStandardMaterial({color:0x555555,metalness:0.3,roughness:0.5});
+      const mesh=new THREE.Mesh(geo,mat);mesh.position.copy(mid);
+      if(off){const perp=new THREE.Vector3(-dir.y,dir.x,0).normalize().multiplyScalar(off);mesh.position.add(perp);}
+      const axis=new THREE.Vector3(0,1,0);
+      mesh.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(axis,dir.clone().normalize()));
+      mesh.castShadow=true;group.add(mesh);
+    }
+    if(b.dbl){makeBond(0.09);makeBond(-0.09);}else makeBond(0);
+  });
+
+  scene.add(new THREE.AmbientLight(0xffffff,0.35));
+  const dl=new THREE.DirectionalLight(0xffffff,0.9);dl.position.set(5,8,5);dl.castShadow=true;scene.add(dl);
+  const pl=new THREE.PointLight(0x00ff88,0.35,30);pl.position.set(-4,3,-3);scene.add(pl);
+  const pl2=new THREE.PointLight(0x00ccff,0.25,30);pl2.position.set(4,-2,4);scene.add(pl2);
+  const pl3=new THREE.PointLight(0xff6633,0.15,20);pl3.position.set(0,-5,0);scene.add(pl3);
+
+  function animate(){
+    molAnimId=requestAnimationFrame(animate);
+    if(!controls.isDragging)group.rotation.y+=0.003;
+    renderer.render(scene,camera);
+  }
+  animate();
+}
+
+// ========== RENDER FULL UI ==========
+function renderUI(el){
+  const app=document.getElementById('app');
+  const dc=v=>v<30?'#00ff88':v<60?'#ffaa00':'#ff3366';
+  app.innerHTML=`
+    <div class="left-col">
+      <div class="models-row">
+        <div class="viewport-wrap" id="atom-vp">
+          <div class="element-badge">
+            <span class="atomic-num">${el.atomicNum}</span>
+            <span class="symbol">${el.sym}</span>
+            <span class="name">${el.name}</span>
+          </div>
+          <div class="fake-tag">\u25CF Fictional</div>
+          <div class="viewport-label">Orbital Model</div>
+        </div>
+        <div class="viewport-wrap" id="mol-vp">
+          <div class="viewport-label">Molecular Structure \u2014 Drag to Rotate \u00B7 Scroll to Zoom</div>
+        </div>
+      </div>
+      <div class="element-card">
+        <h2>${el.name}</h2>
+        <div class="category">${el.category}</div>
+        <p class="description">${el.description}</p>
+        <p class="discovery">Theorized ${el.year} by <span>${el.discoverer}</span> at the ${el.lab}.</p>
+      </div>
+    </div>
+    <div class="right-col">
+      <div class="prop-section"><h3>Atomic Properties</h3>
+        <div class="prop-grid">
+          <div class="prop-item"><span class="label">Atomic Number</span><span class="value highlight">${el.atomicNum}</span></div>
+          <div class="prop-item"><span class="label">Atomic Mass</span><span class="value">${el.atomicMass} u</span></div>
+          <div class="prop-item"><span class="label">Electronegativity</span><span class="value">${el.electronegativity}</span></div>
+          <div class="prop-item"><span class="label">Ionization Energy</span><span class="value">${el.ionizationEnergy} kJ/mol</span></div>
+          <div class="prop-item"><span class="label">Atomic Radius</span><span class="value">${el.atomicRadius} pm</span></div>
+          <div class="prop-item"><span class="label">Oxidation States</span><span class="value">${el.oxidationStates.map(s=>(s>0?'+':'')+s).join(', ')}</span></div>
+        </div>
+      </div>
+      <div class="prop-section"><h3>Physical Properties</h3>
+        <div class="prop-grid">
+          <div class="prop-item"><span class="label">State (STP)</span><span class="value">${el.state}</span></div>
+          <div class="prop-item"><span class="label">Appearance</span><span class="value">${el.color}</span></div>
+          <div class="prop-item"><span class="label">Melting Point</span><span class="value">${el.meltingPoint} \u00B0C</span></div>
+          <div class="prop-item"><span class="label">Boiling Point</span><span class="value">${el.boilingPoint} \u00B0C</span></div>
+          <div class="prop-item"><span class="label">Density</span><span class="value">${el.density} g/cm\u00B3</span></div>
+          <div class="prop-item"><span class="label">Crystal Structure</span><span class="value">${el.crystal}</span></div>
+        </div>
+      </div>
+      <div class="prop-section"><h3>Electron Configuration</h3>
+        <div class="electron-config">${el.configStr.replace(/\^(\d+)/g,'<sup>$1</sup>')}</div>
+        <div class="shells-vis" style="margin-bottom:20px;">
+          ${el.shells.map(s=>`<div class="shell-bar" style="height:${Math.max((s.electrons/32)*100,8)}%"><span class="shell-count">${s.electrons}</span><span class="shell-label">${s.name}</span></div>`).join('')}
+        </div>
+      </div>
+      <div class="prop-section"><h3>Hazard Profile</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${[['Radioactivity',el.radioactivity],['Toxicity',el.toxicity],['Reactivity',el.reactivity]].map(([l,v])=>`<div><div style="display:flex;justify-content:space-between;"><span class="label">${l}</span><span class="label">${v.toFixed(0)}%</span></div><div class="danger-bar"><div class="danger-fill" style="width:${v}%;background:${dc(v)}"></div></div></div>`).join('')}
+        </div>
+        <div style="margin-top:10px"><span class="label">Half-life</span><span class="value" style="display:block;margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:0.85rem;">${el.halfLife}</span></div>
+      </div>
+      <div class="prop-section"><h3>Known Isotopes</h3>
+        <div class="isotopes-list">
+          ${el.isotopes.map(iso=>`<span class="isotope-chip ${iso.stable?'stable':''}">${iso.notation}${iso.stable?' \u2726':''}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  initAtomModel(document.getElementById('atom-vp'),el);
+  initMolecularModel(document.getElementById('mol-vp'),el);
+}
+
+function generate(){
+  const app=document.getElementById('app');app.style.opacity='0';
+  setTimeout(()=>{renderUI(generateElement());app.style.opacity='1';},200);
+}
+generate();
+</script>
+
+</body>
+</html>
